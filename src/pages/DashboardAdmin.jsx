@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { fetchAdminSoftware } from "../utils/software";
 import { FaArrowsRotate } from "react-icons/fa6";
 const ITEMS_PER_PAGE = 4;
-const API_URL = "http://localhost:5000";
+const API_URL = "https://user-management-backend-lake.vercel.app";
 
 const DashboardAdmin = () => {
   const navigate = useNavigate();

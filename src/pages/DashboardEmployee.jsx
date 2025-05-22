@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowsRotate } from "react-icons/fa6";
 
+const API_URL = "https://user-management-backend-lake.vercel.app";
+
 const DashboardEmployee = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
@@ -14,7 +16,7 @@ const DashboardEmployee = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
 
-  const API_URL = "http://localhost:5000";
+  
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");

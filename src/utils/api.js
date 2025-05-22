@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000";
+const API_URL = "https://user-management-backend-lake.vercel.app";
 
 // utils/api.js
 export const signupUser = async ({ username, password, role }) => {

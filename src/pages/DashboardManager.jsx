@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+const API_URL = "https://user-management-backend-lake.vercel.app";
+
 
 const DashboardManager = () => {
   const navigate = useNavigate();
@@ -7,7 +9,6 @@ const DashboardManager = () => {
   const [role, setRole] = useState("");
   const [pendingRequests, setPendingRequests] = useState([]);
 
-  const API_URL = "http://localhost:5000";
 
   const fetchPendingRequests = async () => {
     const token = localStorage.getItem("token");
