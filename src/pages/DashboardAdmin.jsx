@@ -1,13 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fetchAdminSoftware } from "../utils/software";
-
+import { FaArrowsRotate } from "react-icons/fa6";
 const ITEMS_PER_PAGE = 4;
-
-const API_URL = "https://user-management-backend-lake.vercel.app"
+const API_URL = "http://localhost:5000";
 
 const DashboardAdmin = () => {
   const navigate = useNavigate();
+  const dropdownRef = useRef(null);
+  const bellRef = useRef(null);
+
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("");
   const [softwareList, setSoftwareList] = useState([]);
@@ -15,6 +17,7 @@ const DashboardAdmin = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [showRequestsDropdown, setShowRequestsDropdown] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchPendingRequests = async () => {
     const token = localStorage.getItem("token");
@@ -31,6 +34,13 @@ const DashboardAdmin = () => {
     }
   };
 
+  const handleRefreshClick = async () => {
+  setIsRefreshing(true);
+  await fetchPendingRequests();
+  setTimeout(() => setIsRefreshing(false), 500); // Optional delay for smooth spin
+};
+
+
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
     const storedRole = localStorage.getItem("role");
@@ -45,6 +55,22 @@ const DashboardAdmin = () => {
       fetchPendingRequests();
     }
   }, [navigate]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        bellRef.current &&
+        !bellRef.current.contains(event.target)
+      ) {
+        setShowRequestsDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -84,15 +110,21 @@ const DashboardAdmin = () => {
 
   const totalPages = Math.ceil(softwareList.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedList = softwareList.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const paginatedList = softwareList.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 to-white">
       <nav className="bg-purple-700 text-white py-4 px-6 flex justify-between items-center shadow-md relative">
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         <div className="flex items-center gap-6">
-          <div className="relative">
+          <div className="relative flex gap-4">
+            
+            {/* Bell Icon */}
             <button
+              ref={bellRef}
               onClick={() => setShowRequestsDropdown((prev) => !prev)}
               className="relative focus:outline-none"
             >
@@ -115,9 +147,24 @@ const DashboardAdmin = () => {
               )}
             </button>
 
+            {/* Refresh Icon */}
+            <button
+              onClick={handleRefreshClick}
+              className="focus:outline-none hover:cursor-pointer hover:text-gray-200 transition text-xl"
+              title="Refresh Requests"
+            >
+            <FaArrowsRotate className={isRefreshing ? "animate-spin" : ""} />
+            </button>
+
+            {/* Requests Dropdown */}
             {showRequestsDropdown && (
-              <div className="absolute right-0 mt-2 w-96 bg-white border border-gray-200 rounded-md shadow-lg z-50 p-4">
-                <h4 className="text-lg font-semibold text-gray-700 mb-2">Pending Requests</h4>
+              <div
+                ref={dropdownRef}
+                className="absolute right-0 mt-10 w-96 bg-white border border-gray-200 rounded-md shadow-lg z-50 p-4"
+              >
+                <h4 className="text-lg font-semibold text-gray-700 mb-2">
+                  Pending Requests
+                </h4>
                 {pendingRequests.length === 0 ? (
                   <p className="text-gray-500">No pending requests.</p>
                 ) : (
@@ -127,16 +174,22 @@ const DashboardAdmin = () => {
                         <p className="text-sm font-semibold text-gray-800">
                           {req.software?.name} - {req.user?.username}
                         </p>
-                        <p className="text-xs text-gray-500">Reason: {req.reason}</p>
+                        <p className="text-xs text-gray-500">
+                          Reason: {req.reason}
+                        </p>
                         <div className="mt-2 flex space-x-2">
                           <button
-                            onClick={() => updateRequestStatus(req._id, "Approved")}
+                            onClick={() =>
+                              updateRequestStatus(req._id, "Approved")
+                            }
                             className="text-green-600 hover:underline text-sm"
                           >
                             Approve
                           </button>
                           <button
-                            onClick={() => updateRequestStatus(req._id, "Rejected")}
+                            onClick={() =>
+                              updateRequestStatus(req._id, "Cancelled")
+                            }
                             className="text-red-600 hover:underline text-sm"
                           >
                             Reject
@@ -177,7 +230,9 @@ const DashboardAdmin = () => {
       </div>
 
       <div className="mt-10 px-6">
-        <h3 className="text-xl font-semibold text-purple-800 mb-4">All Created Software</h3>
+        <h3 className="text-xl font-semibold text-purple-800 mb-4">
+          All Created Software
+        </h3>
         {error && <p className="text-red-500">{error}</p>}
         {softwareList.length === 0 ? (
           <p className="text-gray-600">No software created yet.</p>
@@ -185,8 +240,13 @@ const DashboardAdmin = () => {
           <>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {paginatedList.map((software) => (
-                <div key={software._id} className="bg-white p-4 shadow rounded-lg border border-purple-100">
-                  <h4 className="text-lg font-bold text-purple-700">{software.name}</h4>
+                <div
+                  key={software._id}
+                  className="bg-white p-4 shadow rounded-lg border border-purple-100"
+                >
+                  <h4 className="text-lg font-bold text-purple-700">
+                    {software.name}
+                  </h4>
                   <p className="text-gray-700">{software.description}</p>
                   <p className="text-sm text-gray-500 mt-1">
                     Access Levels: {software.accessLevels.join(", ")}
@@ -207,7 +267,9 @@ const DashboardAdmin = () => {
                 Page {currentPage} of {totalPages}
               </span>
               <button
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className="px-4 py-2 border border-purple-500 text-purple-600 rounded hover:bg-purple-100 disabled:opacity-50"
               >

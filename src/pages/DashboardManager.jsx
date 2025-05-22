@@ -7,7 +7,7 @@ const DashboardManager = () => {
   const [role, setRole] = useState("");
   const [pendingRequests, setPendingRequests] = useState([]);
 
-  const API_URL = "https://user-management-backend-lake.vercel.app/";
+  const API_URL = "http://localhost:5000";
 
   const fetchPendingRequests = async () => {
     const token = localStorage.getItem("token");

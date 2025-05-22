@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaArrowsRotate } from "react-icons/fa6";
 
 const DashboardEmployee = () => {
   const navigate = useNavigate();
@@ -8,11 +9,12 @@ const DashboardEmployee = () => {
   const [softwares, setSoftwares] = useState([]);
   const [requests, setRequests] = useState({});
   const [approvedSoftwareList, setApprovedSoftwareList] = useState([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
 
-  const API_URL = "https://user-management-backend-lake.vercel.app"
+  const API_URL = "http://localhost:5000";
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
@@ -27,6 +29,7 @@ const DashboardEmployee = () => {
     setUsername(storedUsername);
     setRole(storedRole);
 
+    // Fetch software list
     fetch(`${API_URL}/api/software`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -34,33 +37,43 @@ const DashboardEmployee = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        const reversed = data.reverse(); // ✅ Show newest first
+        const reversed = data.reverse();
         setSoftwares(reversed);
       })
       .catch((err) => console.error("Error fetching software:", err));
 
-    fetch(`${API_URL}/api/requests/myrequests`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const reqStatusMap = {};
-        const approved = [];
-
-        data.forEach((req) => {
-          reqStatusMap[req.software._id] = req.status;
-          if (req.status === "Approved") {
-            approved.push(req.software);
-          }
-        });
-
-        setRequests(reqStatusMap);
-        setApprovedSoftwareList(approved);
-      })
-      .catch((err) => console.error("Error fetching requests:", err));
+    fetchMyRequests();
   }, [navigate]);
+
+  // 🔄 Refreshable request fetch
+  const fetchMyRequests = async () => {
+    const token = localStorage.getItem("token");
+    setIsRefreshing(true);
+    try {
+      const res = await fetch(`${API_URL}/api/requests/myrequests`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      const reqStatusMap = {};
+      const approved = [];
+
+      data.forEach((req) => {
+        reqStatusMap[req.software._id] = req.status;
+        if (req.status === "Approved") {
+          approved.push(req.software);
+        }
+      });
+
+      setRequests(reqStatusMap);
+      setApprovedSoftwareList(approved);
+    } catch (err) {
+      console.error("Error fetching requests:", err);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -116,11 +129,19 @@ const DashboardEmployee = () => {
         </div>
       </div>
 
-      {/* Software Section */}
-      <h2 className="text-2xl font-semibold text-purple-700 text-center mt-10 mb-6">
-        Available Softwares
-      </h2>
+      {/* Section Header with Refresh Button */}
+      <div className="flex justify-center items-center mt-10 mb-6 gap-3">
+        <h2 className="text-2xl font-semibold text-purple-700">Available Softwares</h2>
+        <button
+          onClick={fetchMyRequests}
+          title="Refresh Requests"
+          className="text-purple-700 text-xl hover:text-purple-900 transition"
+        >
+          <FaArrowsRotate className={isRefreshing ? "animate-spin" : ""} />
+        </button>
+      </div>
 
+      {/* Software Cards */}
       <div className="flex flex-wrap justify-center gap-6 px-6 pb-10">
         {currentSoftwares.map((software) => (
           <SoftwareCard
