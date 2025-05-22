@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-const API_URL = "https://user-management-backend-lake.vercel.app";
 import { RefreshCcw } from "lucide-react";
+
+const API_URL = "https://user-management-backend-lake.vercel.app";
 
 const DashboardManager = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("");
   const [pendingRequests, setPendingRequests] = useState([]);
+  const [isRefreshing, setIsRefreshing] = useState(false); // For rotating icon
 
   const fetchPendingRequests = async () => {
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch(`{API_URL}/api/requests/pending`, {
+      const response = await fetch(`${API_URL}/api/requests/pending`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -22,6 +24,14 @@ const DashboardManager = () => {
     } catch (err) {
       console.error("Error fetching pending requests:", err);
     }
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    setTimeout(async () => {
+      await fetchPendingRequests();
+      setIsRefreshing(false);
+    }, 1000); // 1000ms = 1s
   };
 
   useEffect(() => {
@@ -56,7 +66,6 @@ const DashboardManager = () => {
       });
 
       if (response.ok) {
-        // Refresh the list after update
         fetchPendingRequests();
       } else {
         console.error("Failed to update request status");
@@ -88,23 +97,25 @@ const DashboardManager = () => {
           Your role: <span className="font-medium">{role}</span>
         </p>
         <p className="text-gray-600">
-          This is your manager dashboard. Review and manage pending access
-          requests.
+          This is your manager dashboard. Review and manage pending access requests.
         </p>
       </div>
 
-      {/* Heading */}
-      {/* Heading with Refresh Button */}
+      {/* Heading with Refresh */}
       <div className="flex items-center justify-center gap-4 mt-10">
         <h2 className="text-2xl font-semibold text-purple-700">
           Pending Access Requests
         </h2>
         <button
-          onClick={fetchPendingRequests}
+          onClick={handleRefresh}
           className="p-2 rounded-full hover:bg-purple-100 transition"
           title="Refresh"
         >
-          <RefreshCcw className="text-purple-700 w-5 h-5" />
+          <RefreshCcw
+            className={`text-purple-700 w-5 h-5 transition-transform duration-500 ${
+              isRefreshing ? "animate-spin" : ""
+            }`}
+          />
         </button>
       </div>
 
@@ -117,10 +128,7 @@ const DashboardManager = () => {
               className="w-96 p-6 bg-white rounded-lg shadow-md border border-yellow-300"
             >
               <h3 className="text-lg font-semibold text-purple-800 mb-2">
-                User:{" "}
-                <span className="text-gray-800">
-                  {req.user?.username || "N/A"}
-                </span>
+                User: <span className="text-gray-800">{req.user?.username || "N/A"}</span>
               </h3>
               <p className="text-gray-700 mb-1">
                 <strong>Software:</strong> {req.software?.name || "N/A"}
@@ -152,9 +160,7 @@ const DashboardManager = () => {
             </div>
           ))
         ) : (
-          <p className="text-gray-600 text-center">
-            No pending requests found.
-          </p>
+          <p className="text-gray-600 text-center">No pending requests found.</p>
         )}
       </div>
     </div>
