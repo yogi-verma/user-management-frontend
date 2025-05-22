@@ -1,3 +1,6 @@
+![Screenshot (247)](https://github.com/user-attachments/assets/594b76eb-b310-41f3-b27e-7c52ead274d9)
+
+
 🧭 User Access Management System (MERN Stack)
 A role-based access management system with authentication, software listing, access request workflow, and role-specific dashboards.
 
