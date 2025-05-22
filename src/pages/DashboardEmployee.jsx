@@ -12,6 +12,8 @@ const DashboardEmployee = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
 
+  const API_URL = "https://user-management-backend-lake.vercel.app"
+
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
     const storedRole = localStorage.getItem("role");
@@ -25,7 +27,7 @@ const DashboardEmployee = () => {
     setUsername(storedUsername);
     setRole(storedRole);
 
-    fetch("http://localhost:5000/api/software", {
+    fetch(`${API_URL}/api/software`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -37,7 +39,7 @@ const DashboardEmployee = () => {
       })
       .catch((err) => console.error("Error fetching software:", err));
 
-    fetch("http://localhost:5000/api/requests/myrequests", {
+    fetch(`${API_URL}/api/requests/myrequests`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -68,7 +70,7 @@ const DashboardEmployee = () => {
   const handleSubmitRequest = async (softwareId, accessType, reason, closeForm) => {
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://localhost:5000/api/requests", {
+      const res = await fetch(`${API_URL}/api/requests`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

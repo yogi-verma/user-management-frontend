@@ -1,6 +1,8 @@
+const API_URL = "https://user-management-backend-lake.vercel.app"
+
 // utils/api.js
 export const signupUser = async ({ username, password, role }) => {
-  const res = await fetch("http://localhost:5000/api/auth/signup", {
+  const res = await fetch(`${API_URL}/api/auth/signup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -21,7 +23,7 @@ export const signupUser = async ({ username, password, role }) => {
 
 
 export const loginUser = async ({ username, password }) => {
-  const res = await fetch("http://localhost:5000/api/auth/login", {
+  const res = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

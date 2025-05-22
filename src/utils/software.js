@@ -1,8 +1,11 @@
+const API_URL = "https://user-management-backend-lake.vercel.app";
+
+
 export const createSoftware = async (softwareData) => {
   const token = localStorage.getItem("token"); // assuming token is stored after login/signup
   console.log(token);
 
-  const response = await fetch("http://localhost:5000/api/software", {
+  const response = await fetch(`${API_URL}/api/software`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -30,7 +33,7 @@ export const fetchAdminSoftware = async () => {
     throw new Error("No token found. Please log in again.");
   }
 
-  const res = await fetch("http://localhost:5000/api/software", {
+  const res = await fetch(`${API_URL}/api/software`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

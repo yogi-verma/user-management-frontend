@@ -7,10 +7,12 @@ const DashboardManager = () => {
   const [role, setRole] = useState("");
   const [pendingRequests, setPendingRequests] = useState([]);
 
+  const API_URL = "https://user-management-backend-lake.vercel.app/";
+
   const fetchPendingRequests = async () => {
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:5000/api/requests/pending", {
+      const response = await fetch(`{API_URL}/api/requests/pending`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -44,7 +46,7 @@ const DashboardManager = () => {
   const updateRequestStatus = async (id, status) => {
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch(`http://localhost:5000/api/requests/${id}`, {
+      const response = await fetch(`${API_URL}/api/requests/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
