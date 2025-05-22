@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 const API_URL = "https://user-management-backend-lake.vercel.app";
-
+import { RefreshCcw } from "lucide-react";
 
 const DashboardManager = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("");
   const [pendingRequests, setPendingRequests] = useState([]);
-
 
   const fetchPendingRequests = async () => {
     const token = localStorage.getItem("token");
@@ -89,14 +88,25 @@ const DashboardManager = () => {
           Your role: <span className="font-medium">{role}</span>
         </p>
         <p className="text-gray-600">
-          This is your manager dashboard. Review and manage pending access requests.
+          This is your manager dashboard. Review and manage pending access
+          requests.
         </p>
       </div>
 
       {/* Heading */}
-      <h2 className="text-2xl font-semibold text-purple-700 text-center mt-10">
-        Pending Access Requests
-      </h2>
+      {/* Heading with Refresh Button */}
+      <div className="flex items-center justify-center gap-4 mt-10">
+        <h2 className="text-2xl font-semibold text-purple-700">
+          Pending Access Requests
+        </h2>
+        <button
+          onClick={fetchPendingRequests}
+          className="p-2 rounded-full hover:bg-purple-100 transition"
+          title="Refresh"
+        >
+          <RefreshCcw className="text-purple-700 w-5 h-5" />
+        </button>
+      </div>
 
       {/* Pending Requests List */}
       <div className="flex flex-wrap justify-center gap-6 px-6 py-10">
@@ -107,7 +117,10 @@ const DashboardManager = () => {
               className="w-96 p-6 bg-white rounded-lg shadow-md border border-yellow-300"
             >
               <h3 className="text-lg font-semibold text-purple-800 mb-2">
-                User: <span className="text-gray-800">{req.user?.username || "N/A"}</span>
+                User:{" "}
+                <span className="text-gray-800">
+                  {req.user?.username || "N/A"}
+                </span>
               </h3>
               <p className="text-gray-700 mb-1">
                 <strong>Software:</strong> {req.software?.name || "N/A"}
@@ -139,7 +152,9 @@ const DashboardManager = () => {
             </div>
           ))
         ) : (
-          <p className="text-gray-600 text-center">No pending requests found.</p>
+          <p className="text-gray-600 text-center">
+            No pending requests found.
+          </p>
         )}
       </div>
     </div>
